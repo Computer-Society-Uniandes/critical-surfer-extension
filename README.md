@@ -57,6 +57,6 @@ Note: AI calls use Chrome's Built-in AI Early Preview APIs when available, and g
 
 ## Demo Video
 
-Replace YOUR_YOUTUBE_VIDEO_ID in your repo landing page or docs when ready.
+Soon to be done.
 
 
