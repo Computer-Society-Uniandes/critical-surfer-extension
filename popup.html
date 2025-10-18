@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Critical Surfer</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial; }
+      .container { width: 320px; padding: 12px; }
+      h1 { font-size: 16px; margin: 0 0 8px; }
+      .subtitle { color: #6b7280; font-size: 12px; margin-bottom: 8px; }
+      ul { margin: 8px 0 0; padding-left: 16px; }
+      li { margin: 6px 0; line-height: 1.4; }
+      .loading { font-size: 12px; color: #6b7280; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Critical Surfer Insights</h1>
+      <div class="subtitle">Quick questions to reflect before trusting or sharing.</div>
+      <div id="loading" class="loading">Loading insights…</div>
+      <ul id="critical-questions"></ul>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+  </html>
+
+

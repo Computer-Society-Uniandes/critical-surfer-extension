@@ -1,0 +1,57 @@
+/* style.css */
+
+/* Popup styles are defined within popup.html for isolation. */
+
+/* In-page Communication Assistant box */
+#cs-suggestion-box {
+  position: absolute;
+  z-index: 2147483647;
+  max-width: 420px;
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  overflow: hidden;
+  display: none;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+#cs-suggestion-box .cs-header {
+  font-weight: 600;
+  padding: 10px 12px;
+  background: #0b1220;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+#cs-suggestion-box .cs-body {
+  padding: 12px;
+  line-height: 1.5;
+}
+
+#cs-suggestion-box .cs-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px 12px;
+}
+
+#cs-suggestion-box button {
+  appearance: none;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#cs-suggestion-box .cs-apply {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+#cs-suggestion-box .cs-apply:hover { background: #15803d; }
+
+#cs-suggestion-box .cs-dismiss { background: #374151; color: #e5e7eb; }
+#cs-suggestion-box .cs-dismiss:hover { background: #1f2937; }
+
+
