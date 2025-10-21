@@ -3,9 +3,19 @@
 // In-memory store mapping tabId -> array of questions (latest analysis)
 const pageAnalysisResults = {};
 
-// Utility: best-effort check for Chrome AI Early Preview availability
-function hasChromeAI() {
-  return typeof chrome !== 'undefined' && chrome.ai && typeof chrome.ai === 'object';
+// Utility: create an AI API instance if available (2025 self.* entry points)
+async function createIfAvailable(Cls) {
+  try {
+    if (Cls && typeof Cls.availability === 'function') {
+      const availability = await Cls.availability();
+      if (availability && availability.status === 'available' && typeof Cls.create === 'function') {
+        return await Cls.create();
+      }
+    }
+  } catch (e) {
+    // Ignore and fallback to heuristics
+  }
+  return null;
 }
 
 // ===================================================================
@@ -16,13 +26,13 @@ async function analyzePageContent(pageText, tabId) {
     const truncated = (pageText || '').trim().slice(0, 60000);
     let result;
 
-    if (hasChromeAI()) {
-      try {
-        // Summarize content to reduce token load
-        const summarizer = await chrome.ai.createSummarizer();
+    try {
+      // Summarize content to reduce token load
+      const summarizer = await createIfAvailable(typeof self !== 'undefined' ? self.Summarizer : undefined);
+      if (summarizer) {
         const summary = await summarizer.execute({ input: truncated, options: { length: 'short' } });
 
-        const prompt = `
+        const promptText = `
           Based on the following summary of a webpage, identify potential red flags for a young user.
           Red flags include: strong emotional language (fear, anger), urgent calls to action, claims without evidence, or a heavily biased perspective.
           Then, generate exactly 3 short, simple critical thinking questions to help the user evaluate the content.
@@ -31,21 +41,25 @@ async function analyzePageContent(pageText, tabId) {
           Summary: "${summary}"
         `;
 
-        const promptApi = await chrome.ai.createPrompt(prompt);
-        const response = await promptApi.execute();
-
-        try {
-          result = JSON.parse(response);
-        } catch (parseErr) {
-          // Fallback to heuristic JSON if parsing fails
+        const promptApi = await createIfAvailable(typeof self !== 'undefined' ? self.Prompt : undefined);
+        if (promptApi) {
+          const response = await promptApi.execute({ input: promptText });
+          try {
+            result = JSON.parse(response);
+          } catch (parseErr) {
+            // Fallback to heuristic JSON if parsing fails
+            result = heuristicPageAnalysis(truncated);
+          }
+        } else {
+          // Prompt API not available
           result = heuristicPageAnalysis(truncated);
         }
-      } catch (aiErr) {
-        // Any AI errors -> heuristic analysis
+      } else {
+        // Summarizer not available
         result = heuristicPageAnalysis(truncated);
       }
-    } else {
-      // No AI available -> heuristic analysis
+    } catch (aiErr) {
+      // Any AI errors -> heuristic analysis
       result = heuristicPageAnalysis(truncated);
     }
 
@@ -119,19 +133,20 @@ async function getConstructiveRewrite(text) {
   if (!input) return null;
 
   try {
-    if (hasChromeAI()) {
-      try {
-        const promptApi = await chrome.ai.createPrompt('Is this text aggressive or non-constructive? Respond YES or NO.');
-        const toneCheck = await promptApi.execute({ input });
+    try {
+      const promptApi = await createIfAvailable(typeof self !== 'undefined' ? self.Prompt : undefined);
+      if (promptApi) {
+        const toneCheck = await promptApi.execute({ input: `Is this text aggressive or non-constructive? Respond YES or NO.\n\n${input}` });
         if ((toneCheck || '').trim().toUpperCase() === 'YES') {
-          const rewriterApi = await chrome.ai.createRewriter();
-          const rewrite = await rewriterApi.execute({ input, options: { tone: 'constructive' } });
-          return (rewrite || '').trim() || null;
+          const rewriterApi = await createIfAvailable(typeof self !== 'undefined' ? self.Rewriter : undefined);
+          if (rewriterApi) {
+            const rewrite = await rewriterApi.execute({ input, options: { tone: 'constructive' } });
+            return (rewrite || '').trim() || null;
+          }
         }
-        return null;
-      } catch (aiErr) {
-        // Fall through to heuristic path
       }
+    } catch (aiErr) {
+      // Fall through to heuristic path
     }
     // Heuristic tone check and rewrite
     const flagged = heuristicIsAggressive(input);
