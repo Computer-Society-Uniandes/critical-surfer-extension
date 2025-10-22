@@ -1,29 +1,415 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Critical Surfer</title>
+    <title>StudyBuddy AI</title>
     <style>
-      :root { color-scheme: light dark; }
-      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial; }
-      .container { width: 320px; padding: 12px; }
-      h1 { font-size: 16px; margin: 0 0 8px; }
-      .subtitle { color: #6b7280; font-size: 12px; margin-bottom: 8px; }
-      ul { margin: 8px 0 0; padding-left: 16px; }
-      li { margin: 6px 0; line-height: 1.4; }
-      .loading { font-size: 12px; color: #6b7280; }
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          Cantarell, Noto Sans, Arial;
+        background-color: #ffffff;
+        color: #111827;
+      }
+      .container {
+        width: 400px;
+        padding: 16px;
+        background-color: #ffffff;
+        color: #111827;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 12px;
+        color: #2563eb;
+      }
+      .subtitle {
+        color: #6b7280;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .tab {
+        flex: 1;
+        padding: 8px 12px;
+        text-align: center;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+      }
+      .tab.active {
+        border-bottom-color: #2563eb;
+        color: #2563eb;
+        font-weight: 600;
+      }
+      .tab:hover {
+        background-color: #f3f4f6;
+      }
+
+      /* Tab content */
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Upload section */
+      .upload-section {
+        margin-bottom: 16px;
+      }
+      .upload-area {
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .upload-area:hover {
+        border-color: #2563eb;
+        background-color: #f8fafc;
+      }
+      .upload-area.dragover {
+        border-color: #2563eb;
+        background-color: #eff6ff;
+      }
+      .upload-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      .upload-text {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      /* Text input */
+      .text-input {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        resize: vertical;
+        background: white !important;
+        color: #374151 !important;
+        line-height: 1.5;
+      }
+      .text-input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        background: white !important;
+        color: #111827 !important;
+      }
+
+      /* Short answer input */
+      #short-answer {
+        width: 100%;
+        min-height: 60px;
+        padding: 12px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        background: white !important;
+        color: #374151 !important;
+        line-height: 1.5;
+        resize: vertical;
+      }
+      #short-answer:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        background: white !important;
+        color: #111827 !important;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-primary {
+        background-color: #2563eb;
+        color: white;
+      }
+      .btn-primary:hover {
+        background-color: #1d4ed8;
+      }
+      .btn-primary:disabled {
+        background-color: #9ca3af;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background-color: #f3f4f6;
+        color: #374151;
+      }
+      .btn-secondary:hover {
+        background-color: #e5e7eb;
+      }
+
+      /* Quiz section */
+      .quiz-question {
+        margin-bottom: 16px;
+        background-color: #ffffff;
+        color: #111827;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+      }
+
+      /* Quiz content container */
+      #quiz-content {
+        background-color: #ffffff;
+        color: #111827;
+      }
+
+      /* Quiz progress text */
+      #quiz-progress {
+        color: #374151 !important;
+        font-weight: 500;
+        margin-bottom: 16px;
+      }
+      .question-text {
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #111827 !important;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .options {
+        margin-bottom: 12px;
+      }
+      .option {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        background: white !important;
+        color: #374151 !important;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        line-height: 1.4;
+        text-align: left;
+      }
+      .option:hover {
+        border-color: #2563eb;
+        background-color: #f8fafc !important;
+        color: #1f2937 !important;
+      }
+      .option.selected {
+        border-color: #2563eb;
+        background-color: #eff6ff !important;
+        color: #1e40af !important;
+        font-weight: 500;
+      }
+
+      /* Progress */
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background-color: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+      .progress-fill {
+        height: 100%;
+        background-color: #2563eb;
+        transition: width 0.3s;
+      }
+
+      /* Loading */
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #6b7280;
+      }
+      .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e5e7eb;
+        border-top: 2px solid #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Error/Success messages */
+      .message {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+      .message.error {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+      }
+      .message.success {
+        background-color: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+      }
+
+      /* Stats */
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .stat-card {
+        padding: 12px;
+        background-color: #f8fafc;
+        border-radius: 6px;
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2563eb;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Critical Surfer Insights</h1>
-      <div class="subtitle">Quick questions to reflect before trusting or sharing.</div>
-      <div id="loading" class="loading">Loading insights…</div>
-      <ul id="critical-questions"></ul>
+      <h1>📚 StudyBuddy AI</h1>
+      <div class="subtitle">Your AI-powered study companion</div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" data-tab="upload">📝 Upload</div>
+        <div class="tab" data-tab="quiz">🧠 Quiz</div>
+        <div class="tab" data-tab="progress">📊 Progress</div>
+      </div>
+
+      <!-- Upload Tab -->
+      <div class="tab-content active" id="upload-tab">
+        <div class="upload-section">
+          <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">
+              Drop your notes here or click to upload
+            </div>
+            <input
+              type="file"
+              id="file-input"
+              accept=".txt,.md,.pdf,image/*"
+              style="display: none"
+            />
+          </div>
+
+          <div
+            style="
+              margin: 16px 0;
+              text-align: center;
+              color: #6b7280;
+              font-size: 14px;
+            "
+          >
+            OR
+          </div>
+
+          <textarea
+            class="text-input"
+            id="text-input"
+            placeholder="Paste your study notes here..."
+          ></textarea>
+
+          <div style="margin-top: 12px; text-align: right">
+            <button class="btn btn-primary" id="process-btn" disabled>
+              Process Notes
+            </button>
+          </div>
+        </div>
+
+        <div id="upload-message"></div>
+      </div>
+
+      <!-- Quiz Tab -->
+      <div class="tab-content" id="quiz-tab">
+        <div id="quiz-loading" class="loading" style="display: none">
+          <div class="spinner"></div>
+          Generating quiz...
+        </div>
+
+        <div id="quiz-content" style="display: none">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div id="quiz-progress">Question 1 of 5</div>
+
+          <div id="quiz-questions"></div>
+
+          <div style="margin-top: 16px; text-align: center">
+            <button class="btn btn-primary" id="next-btn" disabled>
+              Next Question
+            </button>
+            <button
+              class="btn btn-secondary"
+              id="finish-btn"
+              style="display: none"
+            >
+              Finish Quiz
+            </button>
+          </div>
+        </div>
+
+        <div id="quiz-message"></div>
+      </div>
+
+      <!-- Progress Tab -->
+      <div class="tab-content" id="progress-tab">
+        <div class="stats" id="stats-container">
+          <div class="stat-card">
+            <div class="stat-number" id="total-sessions">0</div>
+            <div class="stat-label">Study Sessions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="avg-score">0%</div>
+            <div class="stat-label">Avg Score</div>
+          </div>
+        </div>
+
+        <div id="progress-message"></div>
+      </div>
     </div>
+
     <script src="popup.js"></script>
   </body>
-  </html>
-
-
+</html>
