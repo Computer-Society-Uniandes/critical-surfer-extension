@@ -85,14 +85,14 @@ class QuizGenerator {
         );
 
         try {
-          // USAR DIRECTAMENTE GENERACIÓN LOCAL - SIN APIs
-          console.log(`🚀 DIRECT LOCAL GENERATION for concept: ${concept}`);
-          const question = this.generateLocalQuestion(
+          // Usar generación con AI (con fallback automático a local)
+          console.log(`🚀 AI-POWERED GENERATION for concept: ${concept}`);
+          const question = await this.generateQuestion(
             concept,
             questionType,
             difficulty
           );
-          console.log("✅ Direct local question generated:", question);
+          console.log("✅ AI question generated:", question);
 
           if (question) {
             quiz.questions.push({
@@ -227,22 +227,38 @@ class QuizGenerator {
     }
   }
 
-  // Generar una pregunta individual - SOLO GENERACIÓN LOCAL
+  // Generar una pregunta individual usando Chrome Built-in AI
   async generateQuestion(concept, questionType, difficulty) {
     console.log(
-      `🔧 GENERATING LOCAL QUESTION for concept: ${concept}, type: ${questionType}`
+      `🚀 GENERATING AI-POWERED QUESTION for concept: ${concept}, type: ${questionType}`
     );
 
     try {
+      // Intentar con Language Model primero
+      if (this.apiManager && this.apiManager.languageModelSession) {
+        console.log("Using Language Model API for question generation");
+        const aiQuestion = await this.generateQuestionWithAI(
+          concept,
+          questionType,
+          difficulty
+        );
+        if (aiQuestion) {
+          console.log("✅ AI question generated:", aiQuestion);
+          return aiQuestion;
+        }
+      }
+
+      // Fallback a generación local
+      console.log("Falling back to local question generation");
       const localQuestion = this.generateLocalQuestion(
         concept,
         questionType,
         difficulty
       );
-      console.log("✅ Generated local question:", localQuestion);
+      console.log("✅ Local question generated:", localQuestion);
       return localQuestion;
     } catch (error) {
-      console.error("❌ Error in local generation:", error);
+      console.error("❌ Error in question generation:", error);
       // Fallback de emergencia
       return {
         type: "short_answer",
@@ -251,6 +267,73 @@ class QuizGenerator {
         explanation: `Concepto: ${concept}`,
       };
     }
+  }
+
+  // Generar pregunta usando Language Model API
+  async generateQuestionWithAI(concept, questionType, difficulty) {
+    try {
+      const prompts = {
+        multipleChoice: `Create a ${difficulty} difficulty multiple choice question about: "${concept}"
+
+Format your response EXACTLY as JSON:
+{
+  "question": "Your question here?",
+  "options": ["Option A", "Option B", "Option C", "Option D"],
+  "correctAnswer": "A",
+  "explanation": "Why this is correct"
+}
+
+Make the question test understanding, not just memorization. Ensure incorrect options are plausible.`,
+
+        trueFalse: `Create a ${difficulty} difficulty true/false question about: "${concept}"
+
+Format your response EXACTLY as JSON:
+{
+  "question": "Your statement here",
+  "correctAnswer": "true",
+  "explanation": "Why this is true/false"
+}
+
+Make it test conceptual understanding.`,
+
+        shortAnswer: `Create a ${difficulty} difficulty short answer question about: "${concept}"
+
+Format your response EXACTLY as JSON:
+{
+  "question": "Your question here?",
+  "answerKey": "Expected key points in answer",
+  "explanation": "Complete answer explanation"
+}
+
+Make the question open-ended but focused.`,
+      };
+
+      const prompt = prompts[questionType] || prompts.multipleChoice;
+      const response = await this.apiManager.languageModelSession.prompt(prompt);
+
+      // Parse JSON response
+      const cleanResponse = response.trim().replace(/```json\n?|\n?```/g, "");
+      const parsedQuestion = JSON.parse(cleanResponse);
+
+      // Convert to internal format
+      return {
+        type: this.convertQuestionType(questionType),
+        ...parsedQuestion,
+      };
+    } catch (error) {
+      console.error("Error generating AI question:", error);
+      return null;
+    }
+  }
+
+  // Convert question type format
+  convertQuestionType(type) {
+    const typeMap = {
+      multipleChoice: "multiple_choice",
+      trueFalse: "true_false",
+      shortAnswer: "short_answer",
+    };
+    return typeMap[type] || type;
   }
 
   // Mejorar el prompt según la dificultad
