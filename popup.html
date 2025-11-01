@@ -6,254 +6,427 @@
     <title>StudyBuddy AI</title>
     <style>
       :root {
-        color-scheme: light dark;
+        color-scheme: dark light;
+        --bg: radial-gradient(circle at top, #12172d 0%, #07090f 80%);
+        --card-bg: #0e1324;
+        --card-elevated: linear-gradient(145deg, rgba(33, 40, 76, 0.9), rgba(18, 22, 43, 0.92));
+        --glass: rgba(18, 26, 48, 0.65);
+        --text-primary: #e2e8ff;
+        --text-secondary: #94a3d3;
+        --border-color: rgba(72, 94, 215, 0.35);
+        --brand: #7c5cff;
+        --brand-accent: #39bdf8;
+        --brand-soft: rgba(124, 92, 255, 0.16);
+        --success-bg: rgba(16, 185, 129, 0.16);
+        --success-border: rgba(16, 185, 129, 0.5);
+        --error-bg: rgba(239, 68, 68, 0.16);
+        --error-border: rgba(239, 68, 68, 0.5);
+        --shadow-soft: 0 20px 60px rgba(2, 6, 24, 0.55);
+        --glow: 0 0 40px rgba(94, 129, 255, 0.45);
       }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
-          Cantarell, Noto Sans, Arial;
-        background-color: #ffffff;
-        color: #111827;
+        font-family: "Inter", "JetBrains Mono", -apple-system, system-ui;
+        background: var(--bg);
+        color: var(--text-primary);
       }
+
       .container {
-        width: 400px;
-        padding: 16px;
-        background-color: #ffffff;
-        color: #111827;
-      }
-      h1 {
-        font-size: 18px;
-        margin: 0 0 12px;
-        color: #2563eb;
-      }
-      .subtitle {
-        color: #6b7280;
-        font-size: 13px;
-        margin-bottom: 16px;
+        width: 440px;
+        min-height: 600px;
+        padding: 22px;
+        background: linear-gradient(160deg, rgba(10, 14, 28, 0.92), rgba(8, 12, 24, 0.92));
+        border: 1px solid rgba(99, 102, 241, 0.18);
+        border-radius: 22px;
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(18px);
       }
 
-      /* Tabs */
-      .tabs {
+      .header {
         display: flex;
-        margin-bottom: 16px;
-        border-bottom: 1px solid #e5e7eb;
-      }
-      .tab {
-        flex: 1;
-        padding: 8px 12px;
-        text-align: center;
-        cursor: pointer;
-        border-bottom: 2px solid transparent;
-      }
-      .tab.active {
-        border-bottom-color: #2563eb;
-        color: #2563eb;
-        font-weight: 600;
-      }
-      .tab:hover {
-        background-color: #f3f4f6;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
       }
 
-      /* Tab content */
+      .logo-badge {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #7c5cff, #39bdf8);
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(124, 92, 255, 0.45);
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+
+      .header p {
+        margin: 4px 0 0 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+        background: rgba(16, 22, 39, 0.7);
+        padding: 6px;
+        border-radius: 14px;
+        border: 1px solid rgba(82, 109, 255, 0.18);
+      }
+
+      .tab {
+        padding: 10px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .tab.active {
+        color: #ffffff;
+        background: linear-gradient(135deg, rgba(124, 92, 255, 0.28), rgba(57, 189, 248, 0.28));
+        border-color: rgba(124, 92, 255, 0.45);
+        box-shadow: inset 0 0 20px rgba(124, 92, 255, 0.35);
+      }
+
+      .tab:hover {
+        color: #ffffff;
+        background: rgba(124, 92, 255, 0.18);
+      }
+
       .tab-content {
         display: none;
       }
+
       .tab-content.active {
         display: block;
       }
 
-      /* Upload section */
-      .upload-section {
-        margin-bottom: 16px;
-      }
-      .upload-area {
-        border: 2px dashed #d1d5db;
-        border-radius: 8px;
+      .hero-card {
+        background: linear-gradient(155deg, rgba(25, 32, 64, 0.78), rgba(10, 14, 30, 0.72));
+        border: 1px solid rgba(95, 115, 255, 0.22);
+        border-radius: 18px;
         padding: 20px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .upload-area:hover {
-        border-color: #2563eb;
-        background-color: #f8fafc;
-      }
-      .upload-area.dragover {
-        border-color: #2563eb;
-        background-color: #eff6ff;
-      }
-      .upload-icon {
-        font-size: 24px;
-        margin-bottom: 8px;
-      }
-      .upload-text {
-        color: #6b7280;
-        font-size: 14px;
+        margin-bottom: 18px;
+        box-shadow: 0 12px 28px rgba(16, 22, 44, 0.6);
       }
 
-      /* Text input */
-      .text-input {
-        width: 100%;
-        min-height: 120px;
-        padding: 12px;
-        border: 2px solid #d1d5db;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 14px;
-        resize: vertical;
-        background: white !important;
-        color: #374151 !important;
-        line-height: 1.5;
-      }
-      .text-input:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        background: white !important;
-        color: #111827 !important;
+      .hero-card h2 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
       }
 
-      /* Short answer input */
-      #short-answer {
-        width: 100%;
-        min-height: 60px;
-        padding: 12px;
-        border: 2px solid #d1d5db;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 14px;
-        background: white !important;
-        color: #374151 !important;
-        line-height: 1.5;
-        resize: vertical;
-      }
-      #short-answer:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        background: white !important;
-        color: #111827 !important;
+      .hero-card p {
+        margin: 0 0 16px 0;
+        font-size: 13px;
+        color: var(--text-secondary);
       }
 
-      /* Buttons */
       .btn {
-        padding: 8px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 18px;
         border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .btn-primary {
-        background-color: #2563eb;
-        color: white;
-      }
-      .btn-primary:hover {
-        background-color: #1d4ed8;
-      }
-      .btn-primary:disabled {
-        background-color: #9ca3af;
-        cursor: not-allowed;
-      }
-      .btn-secondary {
-        background-color: #f3f4f6;
-        color: #374151;
-      }
-      .btn-secondary:hover {
-        background-color: #e5e7eb;
-      }
-
-      /* Quiz section */
-      .quiz-question {
-        margin-bottom: 16px;
-        background-color: #ffffff;
-        color: #111827;
-        padding: 16px;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-      }
-
-      /* Quiz content container */
-      #quiz-content {
-        background-color: #ffffff;
-        color: #111827;
-      }
-
-      /* Quiz progress text */
-      #quiz-progress {
-        color: #374151 !important;
-        font-weight: 500;
-        margin-bottom: 16px;
-      }
-      .question-text {
+        border-radius: 12px;
+        font-size: 13px;
         font-weight: 600;
-        margin-bottom: 12px;
-        color: #111827 !important;
-        font-size: 16px;
-        line-height: 1.5;
-      }
-      .options {
-        margin-bottom: 12px;
-      }
-      .option {
-        display: block;
-        width: 100%;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        border: 2px solid #d1d5db;
-        border-radius: 8px;
-        background: white !important;
-        color: #374151 !important;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
+      }
+
+      .btn-large {
+        padding: 14px 22px;
         font-size: 14px;
-        line-height: 1.4;
-        text-align: left;
       }
-      .option:hover {
-        border-color: #2563eb;
-        background-color: #f8fafc !important;
-        color: #1f2937 !important;
+
+      .btn-primary {
+        background: linear-gradient(135deg, #7c5cff, #39bdf8);
+        color: white;
+        box-shadow: 0 12px 24px rgba(124, 92, 255, 0.35);
       }
-      .option.selected {
-        border-color: #2563eb;
-        background-color: #eff6ff !important;
-        color: #1e40af !important;
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 34px rgba(124, 92, 255, 0.45);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .btn-secondary {
+        background: rgba(25, 33, 63, 0.8);
+        color: var(--text-primary);
+        border: 1px solid rgba(70, 97, 255, 0.3);
+      }
+
+      .btn-secondary:hover {
+        border-color: rgba(124, 92, 255, 0.55);
+        color: #ffffff;
+      }
+
+      .btn-tertiary {
+        background: transparent;
+        color: var(--brand-accent);
+      }
+
+      .message-slot {
+        min-height: 18px;
+        margin-bottom: 12px;
+      }
+
+      .message {
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 13px;
         font-weight: 500;
+        display: flex;
+        gap: 10px;
+        align-items: center;
       }
 
-      /* Progress */
-      .progress-bar {
-        width: 100%;
-        height: 8px;
-        background-color: #e5e7eb;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 8px;
-      }
-      .progress-fill {
-        height: 100%;
-        background-color: #2563eb;
-        transition: width 0.3s;
+      .message.success {
+        background: var(--success-bg);
+        border: 1px solid var(--success-border);
+        color: #4ade80;
       }
 
-      /* Loading */
-      .loading {
+      .message.error {
+        background: var(--error-bg);
+        border: 1px solid var(--error-border);
+        color: #fb7185;
+      }
+
+      .card {
+        background: var(--card-elevated);
+        border: 1px solid rgba(84, 104, 242, 0.24);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 18px rgba(12, 16, 34, 0.55);
+      }
+
+      .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 15px;
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .metric-card {
+        background: rgba(21, 28, 56, 0.9);
+        border-radius: 12px;
+        padding: 12px;
         text-align: center;
-        padding: 20px;
-        color: #6b7280;
+        border: 1px solid rgba(86, 112, 255, 0.2);
       }
+
+      .metric-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+      }
+
+      .metric-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--brand-accent);
+      }
+
+      .pack-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(57, 189, 248, 0.12);
+        font-size: 12px;
+        color: var(--text-secondary);
+        border: 1px solid rgba(57, 189, 248, 0.28);
+      }
+
+      .meta-pill strong {
+        color: #ffffff;
+      }
+
+      .summary-text {
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        white-space: pre-wrap;
+      }
+
+      .bullet-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .bullet-item {
+        display: grid;
+        gap: 4px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(20, 27, 51, 0.85);
+        border: 1px solid rgba(86, 112, 255, 0.2);
+      }
+
+      .bullet-item strong {
+        font-size: 13px;
+      }
+
+      .bullet-item span {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .flashcard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .flashcard {
+        background: linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(57, 189, 248, 0.14));
+        border: 1px solid rgba(124, 92, 255, 0.32);
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 90px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .flashcard-front {
+        font-weight: 600;
+        font-size: 13px;
+        color: #e2e8ff;
+      }
+
+      .flashcard-back {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .breakdown-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .breakdown-step {
+        background: rgba(21, 30, 60, 0.85);
+        border-radius: 12px;
+        padding: 10px;
+        border: 1px solid rgba(90, 115, 255, 0.24);
+      }
+
+      .breakdown-step span {
+        display: block;
+        font-weight: 600;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .breakdown-step p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .mini-quiz-question {
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(20, 30, 60, 0.82);
+        margin-bottom: 8px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        border: 1px solid rgba(86, 112, 255, 0.18);
+      }
+
+      .loading-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: rgba(14, 20, 38, 0.92);
+        border-radius: 14px;
+        border: 1px solid rgba(94, 129, 255, 0.24);
+        color: var(--text-secondary);
+        box-shadow: inset 0 0 35px rgba(94, 129, 255, 0.12);
+      }
+
+      .loading-card .spinner {
+        margin: 0;
+      }
+
       .spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #e5e7eb;
-        border-top: 2px solid #2563eb;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-right: 8px;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(124, 92, 255, 0.18);
+        border-top-color: var(--brand-accent);
+        border-radius: 999px;
+        animation: spin 0.8s linear infinite;
       }
+
       @keyframes spin {
         0% {
           transform: rotate(0deg);
@@ -263,394 +436,520 @@
         }
       }
 
-      /* Error/Success messages */
-      .message {
-        padding: 12px;
-        border-radius: 6px;
-        margin-bottom: 12px;
-        font-size: 14px;
-      }
-      .message.error {
-        background-color: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-      }
-      .message.success {
-        background-color: #f0fdf4;
-        color: #16a34a;
-        border: 1px solid #bbf7d0;
+      .hidden {
+        display: none !important;
       }
 
-      /* Stats */
+      .upload-area {
+        border: 2px dashed rgba(82, 109, 255, 0.32);
+        border-radius: 16px;
+        padding: 28px;
+        text-align: center;
+        transition: all 0.25s ease;
+        background: rgba(15, 20, 40, 0.7);
+      }
+
+      .upload-area:hover {
+        border-color: rgba(124, 92, 255, 0.55);
+        background: rgba(20, 30, 60, 0.82);
+      }
+
+      .upload-area.dragover {
+        border-color: rgba(57, 189, 248, 0.7);
+        background: rgba(18, 28, 55, 0.9);
+        box-shadow: var(--glow);
+      }
+
+      .upload-icon {
+        font-size: 26px;
+        margin-bottom: 8px;
+        color: var(--brand-accent);
+      }
+
+      .upload-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .text-input,
+      #short-answer {
+        width: 100%;
+        min-height: 130px;
+        border-radius: 14px;
+        border: 1px solid rgba(82, 109, 255, 0.28);
+        padding: 14px;
+        font-family: inherit;
+        font-size: 13px;
+        resize: vertical;
+        background: rgba(15, 22, 40, 0.85);
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .text-input:focus,
+      #short-answer:focus {
+        outline: none;
+        border-color: rgba(124, 92, 255, 0.55);
+        box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.22);
+      }
+
+      .quiz-question {
+        background: rgba(16, 24, 46, 0.85);
+        border-radius: 14px;
+        padding: 18px;
+        border: 1px solid rgba(86, 112, 255, 0.22);
+        margin-bottom: 12px;
+      }
+
+      .question-text {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 14px;
+      }
+
+      .options {
+        display: grid;
+        gap: 10px;
+      }
+
+      .option {
+        border-radius: 12px;
+        border: 1px solid rgba(78, 106, 255, 0.24);
+        padding: 12px 14px;
+        background: rgba(12, 18, 35, 0.9);
+        text-align: left;
+        font-size: 13px;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      .option:hover {
+        border-color: rgba(124, 92, 255, 0.5);
+        background: rgba(27, 38, 74, 0.82);
+      }
+
+      .option.selected {
+        background: rgba(124, 92, 255, 0.22);
+        border-color: rgba(124, 92, 255, 0.65);
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(30, 40, 68, 0.65);
+        overflow: hidden;
+        margin-bottom: 14px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #7c5cff, #39bdf8);
+        transition: width 0.3s ease;
+      }
+
       .stats {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
         margin-bottom: 16px;
       }
+
       .stat-card {
-        padding: 12px;
-        background-color: #f8fafc;
-        border-radius: 6px;
+        background: rgba(16, 24, 46, 0.85);
+        padding: 14px;
+        border-radius: 14px;
         text-align: center;
-      }
-      .stat-number {
-        font-size: 20px;
-        font-weight: 600;
-        color: #2563eb;
-      }
-      .stat-label {
-        font-size: 12px;
-        color: #6b7280;
-        margin-top: 4px;
+        border: 1px solid rgba(86, 112, 255, 0.22);
       }
 
-      /* Section headers */
+      .stat-number {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--brand-accent);
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
       .section-header {
         font-size: 14px;
         font-weight: 600;
-        color: #111827;
-        margin: 16px 0 8px 0;
+        color: #ffffff;
+        margin: 18px 0 8px;
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
       }
 
-      /* Notes list */
-      .notes-list {
-        max-height: 200px;
+      .notes-list,
+      .quiz-history,
+      .study-pack-history {
+        max-height: 190px;
         overflow-y: auto;
+        display: grid;
+        gap: 10px;
       }
-      .note-item {
-        background-color: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
+
+      .note-item,
+      .quiz-item,
+      .pack-history-item {
         padding: 12px;
-        margin-bottom: 8px;
-        transition: all 0.2s;
+        border-radius: 12px;
+        border: 1px solid rgba(86, 112, 255, 0.2);
+        background: rgba(13, 19, 38, 0.9);
+        display: grid;
+        gap: 8px;
+        transition: border 0.2s ease, transform 0.2s ease;
       }
-      .note-item:hover {
-        border-color: #2563eb;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+      .note-item:hover,
+      .quiz-item:hover,
+      .pack-history-item:hover {
+        border-color: rgba(124, 92, 255, 0.48);
+        transform: translateY(-2px);
       }
-      .note-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .note-type {
-        font-size: 11px;
-        background-color: #dbeafe;
-        color: #1e40af;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: 500;
-      }
-      .note-date {
-        font-size: 11px;
-        color: #6b7280;
-      }
-      .note-preview {
-        font-size: 13px;
-        color: #374151;
-        margin-bottom: 8px;
-        line-height: 1.4;
-        max-height: 40px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .note-concepts {
+
+      .note-concepts,
+      .pack-concepts {
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
-        margin-bottom: 8px;
+        gap: 6px;
       }
+
       .concept-tag {
-        font-size: 10px;
-        background-color: #e5e7eb;
-        color: #374151;
-        padding: 2px 6px;
-        border-radius: 3px;
-      }
-      .note-actions {
-        display: flex;
-        gap: 8px;
-      }
-      .btn-small {
-        padding: 4px 10px;
-        font-size: 12px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .btn-quiz {
-        background-color: #dbeafe;
-        color: #1e40af;
-      }
-      .btn-quiz:hover {
-        background-color: #bfdbfe;
-      }
-      .btn-delete {
-        background-color: #fee2e2;
-        color: #dc2626;
-      }
-      .btn-delete:hover {
-        background-color: #fecaca;
-      }
-
-      /* Quiz history */
-      .quiz-history {
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .quiz-item {
-        background-color: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 8px;
-        transition: all 0.2s;
-      }
-      .quiz-item:hover {
-        border-color: #2563eb;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      }
-      .quiz-score-badge {
-        display: inline-block;
-        font-size: 16px;
+        padding: 4px 8px;
+        background: rgba(124, 92, 255, 0.22);
+        color: #ffffff;
+        font-size: 11px;
+        border-radius: 999px;
         font-weight: 600;
-        padding: 4px 12px;
-        border-radius: 6px;
-        margin-bottom: 8px;
-      }
-      .quiz-score-excellent {
-        background-color: #dcfce7;
-        color: #16a34a;
-      }
-      .quiz-score-good {
-        background-color: #dbeafe;
-        color: #2563eb;
-      }
-      .quiz-score-fair {
-        background-color: #fef3c7;
-        color: #d97706;
-      }
-      .quiz-score-poor {
-        background-color: #fee2e2;
-        color: #dc2626;
-      }
-      .quiz-details {
-        font-size: 12px;
-        color: #6b7280;
-        margin-bottom: 4px;
       }
 
-      /* Empty states */
       .empty-state {
         text-align: center;
         padding: 24px;
-        color: #6b7280;
-        font-size: 13px;
-      }
-      .empty-icon {
-        font-size: 32px;
-        margin-bottom: 8px;
-        opacity: 0.5;
+        color: var(--text-secondary);
+        border-radius: 12px;
+        background: rgba(15, 22, 40, 0.85);
+        border: 1px dashed rgba(86, 112, 255, 0.2);
       }
 
-      /* Progress chart */
-      .progress-chart {
-        margin: 16px 0;
-        padding: 12px;
-        background-color: #f8fafc;
-        border-radius: 6px;
-        border: 1px solid #e5e7eb;
+      .empty-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
       }
+
+      .performance-chart {
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(16, 24, 46, 0.85);
+        border: 1px solid rgba(86, 112, 255, 0.2);
+      }
+
       .chart-bar {
         display: flex;
         align-items: center;
-        margin-bottom: 8px;
+        gap: 10px;
+        margin-bottom: 10px;
       }
+
       .chart-label {
-        font-size: 11px;
-        color: #6b7280;
-        width: 60px;
-        flex-shrink: 0;
+        width: 70px;
+        font-size: 12px;
+        color: var(--text-secondary);
       }
-      .chart-bar-fill {
+
+      .chart-track {
         flex: 1;
-        height: 20px;
-        background-color: #e5e7eb;
-        border-radius: 4px;
+        height: 18px;
+        background: rgba(86, 112, 255, 0.18);
+        border-radius: 999px;
         overflow: hidden;
         position: relative;
       }
-      .chart-bar-value {
+
+      .chart-fill {
         height: 100%;
-        background: linear-gradient(90deg, #3b82f6, #2563eb);
-        transition: width 0.3s;
+        background: linear-gradient(90deg, #7c5cff, #39bdf8);
       }
-      .chart-percentage {
+
+      .chart-value {
         position: absolute;
         right: 8px;
         top: 50%;
         transform: translateY(-50%);
         font-size: 11px;
         font-weight: 600;
-        color: #fff;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        color: #ffffff;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>📚 StudyBuddy AI</h1>
-      <div class="subtitle">Your AI-powered study companion</div>
-
-      <!-- Tabs -->
-      <div class="tabs">
-        <div class="tab active" data-tab="upload">📝 Upload</div>
-        <div class="tab" data-tab="quiz">🧠 Quiz</div>
-        <div class="tab" data-tab="progress">📊 Progress</div>
+      <div class="header">
+        <div class="logo-badge">🧠</div>
+        <div>
+          <h1>StudyBuddy AI</h1>
+          <p>AI GROUP · COMPUTER SOCIETY UNIANDES</p>
+        </div>
       </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="pack">✨ Study Pack</button>
+        <button class="tab" data-tab="upload">📝 Upload</button>
+        <button class="tab" data-tab="quiz">🧠 Quiz</button>
+        <button class="tab" data-tab="progress">📊 Progress</button>
+      </div>
+
+      <!-- Study Pack Tab -->
+      <section class="tab-content active" id="pack-tab">
+        <div class="hero-card">
+          <h2>Generate a Study Pack</h2>
+          <p>
+            Capture the active tab and instantly turn it into a summary, key concepts,
+            self-reflection prompts, flashcards, and a quick quiz powered by Gemini Nano.
+          </p>
+          <button class="btn btn-primary btn-large" id="generate-pack-btn">
+            🚀 Generate from this page
+          </button>
+        </div>
+
+        <div id="pack-message" class="message-slot"></div>
+
+        <div id="pack-loading" class="loading-card hidden">
+          <div class="spinner"></div>
+          <div>Gathering the current page and crafting study assets...</div>
+        </div>
+
+        <div id="pack-result" class="hidden">
+          <div class="pack-metadata">
+            <div class="meta-pill">
+              <span>Source</span>
+              <strong id="pack-source-title">—</strong>
+            </div>
+            <div class="meta-pill">
+              <span>URL</span>
+              <strong id="pack-source-url">—</strong>
+            </div>
+            <div class="meta-pill">
+              <span>Captured</span>
+              <strong id="pack-captured-at">—</strong>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Reading Time</span>
+              <span class="metric-value" id="pack-reading-time">—</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Concepts</span>
+              <span class="metric-value" id="pack-concept-count">—</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Words</span>
+              <span class="metric-value" id="pack-word-count">—</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Summary</h3>
+              <button class="btn btn-tertiary" id="copy-summary-btn">Copy</button>
+            </div>
+            <div class="summary-text" id="pack-summary-text"></div>
+          </div>
+
+          <div class="card">
+            <h3>Key Takeaways</h3>
+            <div id="pack-takeaways" class="bullet-list"></div>
+          </div>
+
+          <div class="card">
+            <h3>Study Questions</h3>
+            <div id="pack-questions" class="bullet-list"></div>
+          </div>
+
+          <div class="card">
+            <h3>Flashcards</h3>
+            <div id="pack-flashcards" class="flashcard-grid"></div>
+          </div>
+
+          <div class="card">
+            <h3>Focus Plan</h3>
+            <div id="pack-action-steps" class="bullet-list"></div>
+            <div class="breakdown-grid">
+              <div class="breakdown-step">
+                <span>Warm-up</span>
+                <p id="pack-breakdown-warmup"></p>
+              </div>
+              <div class="breakdown-step">
+                <span>Deep dive</span>
+                <p id="pack-breakdown-deepdive"></p>
+              </div>
+              <div class="breakdown-step">
+                <span>Review</span>
+                <p id="pack-breakdown-review"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Mini Quiz preview</h3>
+              <button class="btn btn-secondary" id="launch-quiz-btn">
+                Start full quiz
+              </button>
+            </div>
+            <div id="pack-quiz-preview"></div>
+          </div>
+        </div>
+      </section>
 
       <!-- Upload Tab -->
-      <div class="tab-content active" id="upload-tab">
-        <div class="upload-section">
-          <div class="upload-area" id="upload-area">
-            <div class="upload-icon">📄</div>
-            <div class="upload-text">
-              Drop your notes here or click to upload
-            </div>
-            <input
-              type="file"
-              id="file-input"
-              accept=".txt,.md,.pdf,image/*"
-              style="display: none"
-            />
+      <section class="tab-content" id="upload-tab">
+        <div class="upload-area" id="upload-area">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">
+            Drop your notes here or click to upload
           </div>
-
-          <div
-            style="
-              margin: 16px 0;
-              text-align: center;
-              color: #6b7280;
-              font-size: 14px;
-            "
-          >
-            OR
-          </div>
-
-          <textarea
-            class="text-input"
-            id="text-input"
-            placeholder="Paste your study notes here..."
-          ></textarea>
-
-          <div style="margin-top: 12px; text-align: right">
-            <button class="btn btn-primary" id="process-btn" disabled>
-              Process Notes
-            </button>
-          </div>
+          <input
+            type="file"
+            id="file-input"
+            accept=".txt,.md,.pdf,image/*"
+            style="display: none"
+          />
         </div>
 
-        <div id="upload-message"></div>
-      </div>
+        <div style="text-align: center; margin: 16px 0; color: var(--text-secondary); font-size: 13px;">
+          or
+        </div>
+
+        <textarea
+          class="text-input"
+          id="text-input"
+          placeholder="Paste your study notes here (minimum 50 characters)..."
+        ></textarea>
+
+        <div style="margin-top: 14px; text-align: right;">
+          <button class="btn btn-primary" id="process-btn" disabled>
+            Process Notes
+          </button>
+        </div>
+
+        <div id="upload-message" class="message-slot" style="margin-top: 12px;"></div>
+      </section>
 
       <!-- Quiz Tab -->
-      <div class="tab-content" id="quiz-tab">
-        <div id="quiz-loading" class="loading" style="display: none">
+      <section class="tab-content" id="quiz-tab">
+        <div id="quiz-loading" class="loading-card hidden">
           <div class="spinner"></div>
-          Generating quiz...
+          <div>Generating a personalised quiz...</div>
         </div>
 
-        <div id="quiz-content" style="display: none">
+        <div id="quiz-content" class="hidden">
           <div class="progress-bar">
             <div class="progress-fill" id="progress-fill"></div>
           </div>
-          <div id="quiz-progress">Question 1 of 5</div>
-
+          <div id="quiz-progress" style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">
+            Question 1 of 5
+          </div>
           <div id="quiz-questions"></div>
 
-          <div style="margin-top: 16px; text-align: center">
-            <button class="btn btn-primary" id="next-btn" disabled>
-              Next Question
-            </button>
-            <button
-              class="btn btn-secondary"
-              id="finish-btn"
-              style="display: none"
-            >
-              Finish Quiz
-            </button>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 12px;">
+            <button class="btn btn-primary" id="next-btn" disabled>Next question</button>
+            <button class="btn btn-secondary hidden" id="finish-btn">Finish quiz</button>
           </div>
         </div>
 
-        <div id="quiz-message"></div>
-      </div>
+        <div id="quiz-message" class="message-slot" style="margin-top: 14px;"></div>
+
+        <div style="margin-top: 12px; text-align: right;">
+          <button class="btn btn-tertiary" id="generate-quiz-btn">Regenerate quiz</button>
+        </div>
+      </section>
 
       <!-- Progress Tab -->
-      <div class="tab-content" id="progress-tab">
-        <div class="stats" id="stats-container">
+      <section class="tab-content" id="progress-tab">
+        <div class="stats">
           <div class="stat-card">
             <div class="stat-number" id="total-notes">0</div>
-            <div class="stat-label">Total Notes</div>
+            <div class="stat-label">Notes processed</div>
           </div>
           <div class="stat-card">
             <div class="stat-number" id="total-quizzes">0</div>
-            <div class="stat-label">Quizzes Taken</div>
+            <div class="stat-label">Quizzes taken</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number" id="avg-score">0%</div>
-            <div class="stat-label">Avg Score</div>
+            <div  class="stat-number" id="avg-score">0%</div>
+            <div class="stat-label">Average score</div>
           </div>
           <div class="stat-card">
             <div class="stat-number" id="total-concepts">0</div>
-            <div class="stat-label">Concepts Learned</div>
+            <div class="stat-label">Concepts learned</div>
           </div>
         </div>
 
-        <!-- Performance Chart -->
+        <div class="section-header">
+          <span>✨ Recent Study Packs</span>
+          <button class="btn btn-tertiary" id="refresh-pack-history-btn">Refresh</button>
+        </div>
+        <div class="study-pack-history" id="study-pack-history">
+          <div class="empty-state">
+            <div class="empty-icon">✨</div>
+            <div>No study packs yet. Generate one to see it here.</div>
+          </div>
+        </div>
+
         <div class="section-header">
           <span>📈 Recent Performance</span>
         </div>
-        <div class="progress-chart" id="performance-chart">
+        <div class="performance-chart" id="performance-chart">
           <div class="empty-state">
             <div class="empty-icon">📊</div>
-            <div>Complete quizzes to see your performance</div>
+            <div>Complete quizzes to see your progress</div>
           </div>
         </div>
 
-        <!-- Your Notes -->
         <div class="section-header">
           <span>📝 Your Notes</span>
-          <span id="notes-count" style="font-size: 12px; color: #6b7280;"></span>
+          <span id="notes-count" style="font-size: 12px; color: var(--text-secondary);"></span>
         </div>
         <div class="notes-list" id="notes-list">
           <div class="empty-state">
             <div class="empty-icon">📚</div>
-            <div>No notes yet. Upload some to get started!</div>
+            <div>No notes yet. Upload or capture a page to get started.</div>
           </div>
         </div>
 
-        <!-- Quiz History -->
         <div class="section-header">
           <span>🎯 Quiz History</span>
-          <span id="quiz-count" style="font-size: 12px; color: #6b7280;"></span>
+          <span id="quiz-count" style="font-size: 12px; color: var(--text-secondary);"></span>
         </div>
         <div class="quiz-history" id="quiz-history">
           <div class="empty-state">
             <div class="empty-icon">🧠</div>
-            <div>No quizzes completed yet</div>
+            <div>No quizzes completed yet.</div>
           </div>
         </div>
 
-        <div id="progress-message"></div>
-      </div>
+        <div id="progress-message" class="message-slot" style="margin-top: 12px;"></div>
+      </section>
     </div>
 
+    <script src="study-modules/api-manager.js"></script>
+    <script src="study-modules/note-processor.js"></script>
+    <script src="study-modules/quiz-generator.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

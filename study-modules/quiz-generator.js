@@ -38,7 +38,7 @@ class QuizGenerator {
         !processedNotes.concepts ||
         processedNotes.concepts.length === 0
       ) {
-        throw new Error("No hay conceptos válidos para generar el quiz");
+        throw new Error("No valid concepts are available to build the quiz.");
       }
 
       const {
@@ -58,7 +58,7 @@ class QuizGenerator {
         sourceNoteId: processedNotes.id,
         title:
           `Quiz - ${processedNotes.summary?.slice(0, 50)}...` ||
-          "Quiz de Estudio",
+          "Study Quiz",
         questions: [],
         difficulty: difficulty,
         createdAt: Date.now(),
@@ -66,7 +66,8 @@ class QuizGenerator {
         score: null,
       };
 
-      // Generar preguntas para cada concepto
+      const insightsMap = processedNotes.conceptInsights || {};
+
       const conceptsToUse = this.selectConceptsForQuiz(
         processedNotes.concepts,
         questionCount
@@ -76,6 +77,7 @@ class QuizGenerator {
 
       for (let i = 0; i < conceptsToUse.length; i++) {
         const concept = conceptsToUse[i];
+        const conceptInsight = insightsMap[concept] || insightsMap[concept?.trim()] || null;
         const questionType = this.selectQuestionType(questionTypes, i);
 
         console.log(
@@ -85,12 +87,12 @@ class QuizGenerator {
         );
 
         try {
-          // Usar generación con AI (con fallback automático a local)
           console.log(`🚀 AI-POWERED GENERATION for concept: ${concept}`);
           const question = await this.generateQuestion(
             concept,
             questionType,
-            difficulty
+            difficulty,
+            conceptInsight
           );
           console.log("✅ AI question generated:", question);
 
@@ -108,15 +110,13 @@ class QuizGenerator {
             `Error generating question for concept: ${concept}`,
             error
           );
-          // Continuar con el siguiente concepto
         }
       }
 
       if (quiz.questions.length === 0) {
-        throw new Error("No se pudieron generar preguntas válidas");
+        throw new Error("No valid questions could be generated.");
       }
 
-      // Guardar en cache
       this.generatedQuizzes.set(quiz.id, quiz);
 
       console.log("Quiz generated successfully:", quiz);
@@ -135,7 +135,7 @@ class QuizGenerator {
         !processedNotes.concepts ||
         processedNotes.concepts.length === 0
       ) {
-        throw new Error("No hay conceptos válidos para generar el quiz");
+        throw new Error("No valid concepts are available to build the quiz.");
       }
 
       const {
@@ -154,15 +154,17 @@ class QuizGenerator {
         id: this.generateId(),
         sourceNoteId: processedNotes.id,
         title:
-          `Quiz Local - ${processedNotes.summary?.slice(0, 50)}...` ||
-          "Quiz de Estudio (Local)",
+          `Local Quiz - ${processedNotes.summary?.slice(0, 50)}...` ||
+          "Study Quiz (Local)",
         questions: [],
         difficulty: difficulty,
         createdAt: Date.now(),
         completedAt: null,
         score: null,
-        isLocal: true, // Marcar como generado localmente
+        isLocal: true, // Mark as generated locally
       };
+
+      const insightsMap = processedNotes.conceptInsights || {};
 
       // Generar preguntas para cada concepto usando solo lógica local
       const conceptsToUse = this.selectConceptsForQuiz(
@@ -174,6 +176,7 @@ class QuizGenerator {
 
       for (let i = 0; i < conceptsToUse.length; i++) {
         const concept = conceptsToUse[i];
+        const conceptInsight = insightsMap[concept] || insightsMap[concept?.trim()] || null;
         const questionType = this.selectQuestionType(questionTypes, i);
 
         console.log(
@@ -190,7 +193,8 @@ class QuizGenerator {
           const question = this.generateLocalQuestion(
             concept,
             questionType,
-            difficulty
+            difficulty,
+            conceptInsight
           );
           console.log("✅ Direct LOCAL question generated:", question);
 
@@ -213,7 +217,7 @@ class QuizGenerator {
       }
 
       if (quiz.questions.length === 0) {
-        throw new Error("No se pudieron generar preguntas válidas localmente");
+        throw new Error("Unable to generate valid questions locally");
       }
 
       // Guardar en cache
@@ -228,16 +232,55 @@ class QuizGenerator {
   }
 
   // Generar una pregunta individual usando Chrome Built-in AI
-  async generateQuestion(concept, questionType, difficulty) {
+  async generateQuestion(concept, questionType, difficulty, conceptInsight) {
     console.log(
       `🚀 GENERATING AI-POWERED QUESTION for concept: ${concept}, type: ${questionType}`
     );
 
     try {
-      // Intentar con Language Model primero
       if (this.apiManager && this.apiManager.languageModelSession) {
         console.log("Using Language Model API for question generation");
-        const aiQuestion = await this.generateQuestionWithAI(
+        const aiQuestion = await this.generateQuestionWithAIInternal(
+          concept,
+          questionType,
+          difficulty,
+          conceptInsight
+        );
+        if (aiQuestion) {
+          console.log("✅ AI question generated:", aiQuestion);
+          return aiQuestion;
+        }
+      }
+
+      console.log("Falling back to local question generation");
+      const localQuestion = this.generateLocalQuestion(
+        concept,
+        questionType,
+        difficulty,
+        conceptInsight
+      );
+      console.log("✅ Local question generated:", localQuestion);
+      return localQuestion;
+    } catch (error) {
+      console.error("❌ Error in question generation:", error);
+      return {
+        type: "short_answer",
+        question: `Explain the core idea behind ${concept}.`,
+        answerKey: conceptInsight?.keyFact || `Describe why ${concept} matters in this context.`,
+        explanation: conceptInsight?.questionCue || `Concept focus: ${concept}`,
+      };
+    }
+  }
+
+  async generateQuestionWithAI(concept, questionType, difficulty) {
+    console.log(
+      `🚀 GENERATING AI-POWERED QUESTION for concept: ${concept}, type: ${questionType}`
+    );
+
+    try {
+      if (this.apiManager && this.apiManager.languageModelSession) {
+        console.log("Using Language Model API for question generation");
+        const aiQuestion = await this.generateQuestionWithAIInternal(
           concept,
           questionType,
           difficulty
@@ -248,7 +291,6 @@ class QuizGenerator {
         }
       }
 
-      // Fallback a generación local
       console.log("Falling back to local question generation");
       const localQuestion = this.generateLocalQuestion(
         concept,
@@ -259,63 +301,79 @@ class QuizGenerator {
       return localQuestion;
     } catch (error) {
       console.error("❌ Error in question generation:", error);
-      // Fallback de emergencia
       return {
         type: "short_answer",
-        question: `Explica: ${concept}`,
-        answerKey: `Respuesta relacionada con: ${concept}`,
-        explanation: `Concepto: ${concept}`,
+        question: `Explain why ${concept} matters in this context.`,
+        answerKey: `Describe the impact or importance of ${concept}.`,
+        explanation: `Concept focus: ${concept}`,
       };
     }
   }
 
-  // Generar pregunta usando Language Model API
-  async generateQuestionWithAI(concept, questionType, difficulty) {
+  async generateQuestionWithAIInternal(concept, questionType, difficulty, conceptInsight) {
     try {
+      const contextLine = conceptInsight?.keyFact
+        ? `Key fact: ${conceptInsight.keyFact}.`
+        : "";
+      const cueLine = conceptInsight?.questionCue
+        ? `Assessment focus: ${conceptInsight.questionCue}.`
+        : "";
+
       const prompts = {
-        multipleChoice: `Create a ${difficulty} difficulty multiple choice question about: "${concept}"
+        multipleChoice: `You are an instructional designer preparing mastery quizzes for advanced learners.
 
-Format your response EXACTLY as JSON:
+Create a challenging multiple-choice question (four options labelled A–D) about "${concept}".
+${contextLine}
+${cueLine}
+- The question must require comprehension or application, not recall.
+- Provide one correct option and three plausible distractors.
+- Respond strictly in English.
+
+Return your answer as JSON with keys:
 {
-  "question": "Your question here?",
-  "options": ["Option A", "Option B", "Option C", "Option D"],
-  "correctAnswer": "A",
-  "explanation": "Why this is correct"
+  "question": string,
+  "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
+  "correctAnswer": "A/B/C/D",
+  "explanation": "Why the answer is correct"
 }
+Do not include any additional commentary.`,
 
-Make the question test understanding, not just memorization. Ensure incorrect options are plausible.`,
+        trueFalse: `You are an instructional designer preparing mastery quizzes for advanced learners.
 
-        trueFalse: `Create a ${difficulty} difficulty true/false question about: "${concept}"
+Using the following insight, create a precise true/false statement about "${concept}" that tests understanding, not trivia.
+${contextLine}
+${cueLine}
+- Respond strictly in English.
 
-Format your response EXACTLY as JSON:
+Return JSON with keys:
 {
-  "question": "Your statement here",
-  "correctAnswer": "true",
-  "explanation": "Why this is true/false"
-}
+  "question": string,
+  "correctAnswer": "true" | "false",
+  "explanation": string
+}`,
 
-Make it test conceptual understanding.`,
+        shortAnswer: `You are an instructional designer preparing mastery quizzes for advanced learners.
 
-        shortAnswer: `Create a ${difficulty} difficulty short answer question about: "${concept}"
+Write a short-answer question about "${concept}" that prompts a thoughtful response.
+${contextLine}
+${cueLine}
+- Provide a concise answer key highlighting the expected ideas.
+- Respond strictly in English.
 
-Format your response EXACTLY as JSON:
+Return JSON with keys:
 {
-  "question": "Your question here?",
-  "answerKey": "Expected key points in answer",
-  "explanation": "Complete answer explanation"
-}
-
-Make the question open-ended but focused.`,
+  "question": string,
+  "answerKey": string,
+  "explanation": string
+}`,
       };
 
       const prompt = prompts[questionType] || prompts.multipleChoice;
       const response = await this.apiManager.languageModelSession.prompt(prompt);
 
-      // Parse JSON response
-      const cleanResponse = response.trim().replace(/```json\n?|\n?```/g, "");
+      const cleanResponse = response.trim().replace(/```json\n?|```/g, "");
       const parsedQuestion = JSON.parse(cleanResponse);
 
-      // Convert to internal format
       return {
         type: this.convertQuestionType(questionType),
         ...parsedQuestion,
@@ -360,7 +418,7 @@ Make the question open-ended but focused.`,
         case "short_answer":
           return this.parseShortAnswer(response, concept);
         default:
-          throw new Error(`Formato no soportado: ${format}`);
+          throw new Error(`Unsupported format: ${format}`);
       }
     } catch (error) {
       console.error("Error parsing question response:", error);
@@ -373,7 +431,7 @@ Make the question open-ended but focused.`,
   parseMultipleChoice(response, concept) {
     const lines = response.split("\n").filter((line) => line.trim());
     const question =
-      lines[0] || `¿Cuál es la característica principal de: ${concept}?`;
+      lines[0] || `What is the most relevant attribute of: ${concept}?`;
 
     const options = [];
     let correctAnswer = "A";
@@ -388,9 +446,9 @@ Make the question open-ended but focused.`,
       }
     }
 
-    // Si no hay suficientes opciones, generar fallbacks
+    // If we still lack enough choices, pad with generic distractors
     while (options.length < 4) {
-      options.push(`Opción ${options.length + 1}`);
+      options.push(`Option ${options.length + 1}`);
     }
 
     return {
@@ -398,15 +456,15 @@ Make the question open-ended but focused.`,
       question: question,
       options: options.slice(0, 4),
       correctAnswer: correctAnswer,
-      explanation: `Concepto: ${concept}`,
+      explanation: `Concept focus: ${concept}`,
     };
   }
 
-  // Parsear pregunta verdadero/falso
+  // Parse true/false question
   parseTrueFalse(response, concept) {
     const lines = response.split("\n").filter((line) => line.trim());
     const question =
-      lines[0] || `¿Es correcto el siguiente concepto: ${concept}?`;
+      lines[0] || `Is the following statement about ${concept} accurate?`;
 
     let correctAnswer = "true";
     if (response.includes("[FALSE]")) {
@@ -417,35 +475,40 @@ Make the question open-ended but focused.`,
       type: "true_false",
       question: question,
       correctAnswer: correctAnswer,
-      explanation: `Concepto: ${concept}`,
+      explanation: `Concept focus: ${concept}`,
     };
   }
 
   // Parsear pregunta de respuesta corta
   parseShortAnswer(response, concept) {
     const lines = response.split("\n").filter((line) => line.trim());
-    const question = lines[0] || `Explica brevemente: ${concept}`;
+    const question = lines[0] || `Explain briefly: ${concept}`;
 
     const answerKey =
       lines.slice(1).join(" ").trim() ||
-      `Respuesta relacionada con: ${concept}`;
+      `Answer related to: ${concept}`;
 
     return {
       type: "short_answer",
       question: question,
       answerKey: answerKey,
-      explanation: `Concepto: ${concept}`,
+      explanation: `Concept focus: ${concept}`,
     };
   }
 
   // Generar pregunta usando lógica local (sin APIs)
-  generateLocalQuestion(concept, questionType, difficulty) {
+  generateLocalQuestion(concept, questionType, difficulty, conceptInsight) {
     console.log(
       `Generating local question for concept: ${concept}, type: ${questionType}, difficulty: ${difficulty}`
     );
 
+    const detail = conceptInsight?.keyFact || `Understand the relevance of ${concept}.`;
+    const cue = conceptInsight?.questionCue || `Explain why ${concept} matters.`;
+
     const questionTemplates = this.getLocalQuestionTemplates(
       concept,
+      detail,
+      cue,
       difficulty
     );
     const template = questionTemplates[questionType];
@@ -454,6 +517,8 @@ Make the question open-ended but focused.`,
       console.warn(`No local template for ${questionType}, using fallback`);
       return this.createFallbackQuestion(
         concept,
+        detail,
+        cue,
         this.getFormatFromType(questionType)
       );
     }
@@ -462,66 +527,66 @@ Make the question open-ended but focused.`,
   }
 
   // Obtener plantillas de preguntas locales
-  getLocalQuestionTemplates(concept, difficulty) {
+  getLocalQuestionTemplates(concept, detail, cue, difficulty) {
     const difficultyModifiers = {
       easy: {
         multipleChoice: {
-          question: `¿Cuál es la definición básica de ${concept}?`,
+          question: `Which statement best reflects the idea of ${concept}?`,
           options: [
-            `Una característica importante de ${concept}`,
-            `Un proceso relacionado con ${concept}`,
-            `Un ejemplo de ${concept}`,
-            `Una aplicación de ${concept}`,
+            detail,
+            `An unrelated fact about ${concept}.`,
+            `A vague opinion on ${concept}.`,
+            `A misinterpretation of ${concept}.`,
           ],
           correctAnswer: "A",
         },
         trueFalse: {
-          question: `¿Es ${concept} un concepto importante?`,
+          question: `${detail}`,
           correctAnswer: "true",
         },
         shortAnswer: {
-          question: `Define brevemente: ${concept}`,
-          answerKey: `Definición relacionada con ${concept}`,
+          question: `Summarize the idea behind ${concept}.`,
+          answerKey: detail,
         },
       },
       medium: {
         multipleChoice: {
-          question: `¿Cuál es la característica más relevante de ${concept}?`,
+          question: `What best captures the role of ${concept}?`,
           options: [
-            `Aspecto fundamental de ${concept}`,
-            `Proceso principal en ${concept}`,
-            `Beneficio clave de ${concept}`,
-            `Aplicación práctica de ${concept}`,
+            detail,
+            `A superficial benefit of ${concept}.`,
+            `A secondary topic unrelated to ${concept}.`,
+            `A historical remark about ${concept}.`,
           ],
           correctAnswer: "A",
         },
         trueFalse: {
-          question: `¿${concept} requiere comprensión profunda?`,
+          question: `${detail}`,
           correctAnswer: "true",
         },
         shortAnswer: {
-          question: `Explica la importancia de ${concept}`,
-          answerKey: `Explicación sobre la importancia de ${concept}`,
+          question: `Explain why ${concept} matters according to the text.`,
+          answerKey: `${detail} ${cue}`,
         },
       },
       hard: {
         multipleChoice: {
-          question: `¿Cuál es el aspecto más complejo de ${concept}?`,
+          question: `Which option reflects the deeper significance of ${concept}?`,
           options: [
-            `Mecanismo interno de ${concept}`,
-            `Implicaciones avanzadas de ${concept}`,
-            `Conexiones complejas de ${concept}`,
-            `Aplicaciones especializadas de ${concept}`,
+            `${detail} ${cue}`,
+            `A generic description of ${concept}.`,
+            `An advantage unrelated to ${concept}.`,
+            `A short-term effect not tied to ${concept}.`,
           ],
           correctAnswer: "A",
         },
         trueFalse: {
-          question: `¿${concept} involucra múltiples factores interconectados?`,
+          question: `${cue}`,
           correctAnswer: "true",
         },
         shortAnswer: {
-          question: `Analiza críticamente: ${concept}`,
-          answerKey: `Análisis crítico de ${concept}`,
+          question: `Discuss the impact of ${concept} in your own words.`,
+          answerKey: `${detail} ${cue}`,
         },
       },
     };
@@ -535,19 +600,19 @@ Make the question open-ended but focused.`,
         question: modifiers.multipleChoice.question,
         options: modifiers.multipleChoice.options,
         correctAnswer: modifiers.multipleChoice.correctAnswer,
-        explanation: `Concepto: ${concept} (Dificultad: ${difficulty})`,
+        explanation: detail,
       },
       trueFalse: {
         type: "true_false",
         question: modifiers.trueFalse.question,
         correctAnswer: modifiers.trueFalse.correctAnswer,
-        explanation: `Concepto: ${concept} (Dificultad: ${difficulty})`,
+        explanation: detail,
       },
       shortAnswer: {
         type: "short_answer",
         question: modifiers.shortAnswer.question,
         answerKey: modifiers.shortAnswer.answerKey,
-        explanation: `Concepto: ${concept} (Dificultad: ${difficulty})`,
+        explanation: detail,
       },
     };
   }
@@ -563,34 +628,35 @@ Make the question open-ended but focused.`,
   }
 
   // Crear pregunta de fallback si el parsing falla
-  createFallbackQuestion(concept, format) {
+  createFallbackQuestion(concept, detail, cue, format) {
     console.log(
       `Creating fallback question for concept: ${concept}, format: ${format}`
     );
+    const fallbackDetail = detail || `Explain the significance of ${concept}.`;
     const fallbacks = {
       multiple_choice: {
         type: "multiple_choice",
-        question: `¿Qué característica es más importante en: ${concept}?`,
+        question: `Which best summarizes ${concept}?`,
         options: [
-          "Característica A",
-          "Característica B",
-          "Característica C",
-          "Característica D",
+          fallbackDetail,
+          `A misconception about ${concept}.`,
+          `An unrelated idea to ${concept}.`,
+          `A vague statement about ${concept}.`,
         ],
         correctAnswer: "A",
-        explanation: `Concepto: ${concept}`,
+        explanation: fallbackDetail,
       },
       true_false: {
         type: "true_false",
-        question: `¿Es importante entender: ${concept}?`,
+        question: `${fallbackDetail}`,
         correctAnswer: "true",
-        explanation: `Concepto: ${concept}`,
+        explanation: fallbackDetail,
       },
       short_answer: {
         type: "short_answer",
-        question: `Explica: ${concept}`,
-        answerKey: `Respuesta relacionada con: ${concept}`,
-        explanation: `Concepto: ${concept}`,
+        question: `Explain why ${concept} matters.`,
+        answerKey: `${fallbackDetail} ${cue || ""}`.trim(),
+        explanation: fallbackDetail,
       },
     };
 
